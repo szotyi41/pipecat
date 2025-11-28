@@ -1,0 +1,22 @@
+services:
+  pipecat-stt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pipecat-lecture-transcription
+    ports:
+      - "7860:7860"
+    environment:
+      - GOOGLE_TEST_CREDENTIALS=/app/google-credentials.json
+    volumes:
+      # Mount credentials file
+      - ./google-credentials.json:/app/google-credentials.json:ro
+      # Optional: mount .env if you have additional config
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    networks:
+      - pipecat-network
+
+networks:
+  pipecat-network:
+    driver: bridge

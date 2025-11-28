@@ -1,0 +1,34 @@
+[2025-11-27T18:59:23.855+00:00] assistant: Szia! Felveszem az előadásodat.
+[2025-11-28T08:47:16.201+00:00] assistant: Szia! Felveszem az előadásod.
+[2025-11-28T08:49:13.849+00:00] assistant: Szia! Felveszem az előadásodat.
+[2025-11-28T08:53:22.679+00:00] assistant: Szia! Felveszem az előadásodat.
+[2025-11-28T09:17:05.817+00:00] assistant: Szia! Felveszem az előadásod.
+[2025-11-28T09:23:38.261+00:00] user: ready
+[2025-11-28T09:23:40.605+00:00] user:  Waiting for messages.
+[2025-11-28T09:23:44.175+00:00] user:  pontok az nulla
+[2025-11-28T09:23:52.171+00:00] user:  Na most ez megy.
+[2025-11-28T09:23:56.321+00:00] user:  Felveszi a hangomat?
+[2025-11-28T09:23:59.489+00:00] user:  real time
+[2025-11-28T09:24:06.136+00:00] user:  Ezeket miért nem írja ki amúgy?
+[2025-11-28T09:26:54.004+00:00] user: Na, ez most ismeri a hangomat.
+[2025-11-28T09:27:04.684+00:00] user:  Ismered a The Viers nevű csoportosulatot?
+[2025-11-28T09:27:08.577+00:00] user:  Ők ilyen videózással foglalkoznak.
+[2025-11-28T09:30:05.388+00:00] user: Na most itt miről van szó?
+[2025-11-28T09:30:09.339+00:00] user:  Ez az egyetemi előadás?
+[2025-11-28T09:30:28.569+00:00] user:  Csöcsö. Na erre kíváncsi vagyok most.
+[2025-11-28T09:30:45.223+00:00] user:  Aha, szóval nem. Lássuk.
+[2025-11-28T09:30:50.059+00:00] user:  Ez micsoda?
+[2025-11-28T09:31:10.836+00:00] user:  Egy konferencia éppen, és akkor föl kéne venni minden hangot, amit beszélünk, meg minden dolgot erre a Ez a konferencia, mit tudom én, a Telekomnak szól.
+[2025-11-28T09:31:25.496+00:00] user:  Ez így ennyi.
+[2025-11-28T09:31:30.542+00:00] user:  Ez Kocsis Lacinak a több havi munkája.
+[2025-11-28T09:41:29.355+00:00] user: Na, ez egy telekomos megbeszélés, konferencia, az új telefonokról szól.
+[2025-11-28T09:41:44.298+00:00] user:  És az új Samsung Galaxy telefon az az milyen gyors?
+[2025-11-28T09:41:49.016+00:00] user:  Az az abban nagyon gyors processzor van, nem?
+[2025-11-28T09:42:10.184+00:00] user:  Jó, mondjuk ez így hülye válasz volt. Miről szól még mondjuk ez a konferencia? Űrkutatás az például egy töké
+[2025-11-28T09:42:37.001+00:00] user:  érdekes téma. Szóljon az űrkutatásról. Ez a real time ez nem mindig pontosan kapja el.
+[2025-11-28T09:42:50.720+00:00] user:  Hogy működik itt a felvétel? Tehát, hogy én beszélek, mondok valamit, és akkor utána ez feltöltődik automatikusan, real-time?
+[2025-11-28T11:49:09.331+00:00] user: És akkor én most így tudok beszélni.
+[2025-11-28T11:49:17.033+00:00] user:  Ezt miért nem írja ki ide a waiting for messages?
+[2025-11-28T11:56:19.078+00:00] user: Freddy
+[2025-11-28T11:56:24.909+00:00] user:  Nem Freddy, Freddy.
+[2025-11-28T11:56:29.079+00:00] user:  De nem ír be semmit.
