@@ -52,6 +52,39 @@ from pipecat.transports.websocket.fastapi import FastAPIWebsocketParams
 load_dotenv(override=True)
 
 
+async def send_frontend_message(task: PipelineTask, *, text: str | None = None, payload: dict | None = None, user_message: bool = True, level: str = "info"):
+    """Send a structured message to the frontend and log to console.
+
+    - `payload` if provided is sent as the transport message payload.
+    - otherwise a payload of `{"text": text, "type": level}` is used.
+    - if `user_message` is True a `UserTextFrame` with the text is also queued.
+    """
+    if not task:
+        logger.debug("No task provided to send_frontend_message")
+        return
+
+    if payload is None:
+        payload = {"text": text or "", "type": level}
+
+    # Log to console according to level
+    try:
+        if level == "error" or payload.get("type") == "error":
+            logger.error(f"Frontend message: {payload}")
+        else:
+            logger.info(f"Frontend message: {payload}")
+    except Exception:
+        logger.exception("Failed to log frontend message")
+
+    # Queue transport frame(s)
+    try:
+        await task.queue_frame(OutputTransportMessageFrame(message=payload))
+        if user_message:
+            user_text = text if text is not None else payload.get("text", str(payload))
+            await task.queue_frame(UserTextFrame(text=user_text))
+    except Exception:
+        logger.exception("Failed to queue frontend frames")
+
+
 async def start_confai_transcription(task: PipelineTask) -> str | None:
     """Start a remote transcription session at confai and notify UI.
 
@@ -88,10 +121,7 @@ async def start_confai_transcription(task: PipelineTask) -> str | None:
                 if resp_text:
                     logger.error(f"Response body: {resp_text}")
                 try:
-                    ui_err = OutputTransportMessageFrame(message={"text": err_text, "type": "error"})
-                    await task.queue_frame(ui_err)
-                    ui_user_err = UserTextFrame(text=err_text)
-                    await task.queue_frame(ui_user_err)
+                    await send_frontend_message(task, text=err_text, user_message=True, level="error")
                     await task.queue_frame(ErrorFrame(error=err_text, fatal=True))
                 except Exception:
                     logger.exception("Failed to queue error frames")
@@ -105,25 +135,17 @@ async def start_confai_transcription(task: PipelineTask) -> str | None:
                 logger.info(f"Started remote transcription session: {session_id}")
                 # Send filename and source_identifier to frontend as a structured message
                 try:
-                    session_meta = OutputTransportMessageFrame(
-                        message={
-                            "filename": payload["filename"],
-                            "source_identifier": payload["source_identifier"],
-                            "type": "session_start",
-                        }
-                    )
-                    await task.queue_frame(session_meta)
+                    meta_payload = {
+                        "filename": payload["filename"],
+                        "source_identifier": payload["source_identifier"],
+                        "type": "session_start",
+                    }
+                    await send_frontend_message(task, payload=meta_payload, user_message=False, level="info")
                 except Exception:
                     logger.exception("Failed to queue session metadata frame")
                 try:
                     info_text = f"Kapcsolat létrejött a https://confai.telekom.hu/ szolgáltatással. session_id: {session_id}"
-                    info_msg = OutputTransportMessageFrame(message={"text": info_text, "type": "chat"})
-                    logger.info(f"📤 OutputTransportMessageFrame küldése (session info): {info_text}")
-                    await task.queue_frame(info_msg)
-
-                    info_user = UserTextFrame(text=info_text)
-                    logger.info(f"📤 UserTextFrame küldése (session info): {info_text}")
-                    await task.queue_frame(info_user)
+                    await send_frontend_message(task, text=info_text, user_message=True, level="chat")
                 except Exception:
                     logger.exception("Failed to queue session info frames")
                 return session_id
@@ -131,10 +153,7 @@ async def start_confai_transcription(task: PipelineTask) -> str | None:
                 err_text = f"Remote transcription start returned no session_id: {body}"
                 logger.error(err_text)
                 try:
-                    ui_err = OutputTransportMessageFrame(message={"text": err_text, "type": "error"})
-                    await task.queue_frame(ui_err)
-                    ui_user_err = UserTextFrame(text=err_text)
-                    await task.queue_frame(ui_user_err)
+                    await send_frontend_message(task, text=err_text, user_message=True, level="error")
                     await task.queue_frame(ErrorFrame(error=err_text, fatal=True))
                 except Exception:
                     logger.exception("Failed to queue error frames")
@@ -144,10 +163,7 @@ async def start_confai_transcription(task: PipelineTask) -> str | None:
         err_text = f"Error starting remote transcription session: {e}"
         logger.exception(err_text)
         try:
-            ui_err = OutputTransportMessageFrame(message={"text": err_text, "type": "error"})
-            await task.queue_frame(ui_err)
-            ui_user_err = UserTextFrame(text=err_text)
-            await task.queue_frame(ui_user_err)
+            await send_frontend_message(task, text=err_text, user_message=True, level="error")
             await task.queue_frame(ErrorFrame(error=err_text, fatal=True))
         except Exception:
             logger.exception("Failed to queue error frames")
@@ -182,10 +198,7 @@ async def finalize_confai_transcription(task: PipelineTask) -> bool:
                 err_text = f"Failed to finalize remote transcription session: HTTP {resp.status}"
                 logger.error(err_text)
                 try:
-                    ui_err = OutputTransportMessageFrame(message={"text": err_text, "type": "error"})
-                    await task.queue_frame(ui_err)
-                    ui_user_err = UserTextFrame(text=err_text)
-                    await task.queue_frame(ui_user_err)
+                    await send_frontend_message(task, text=err_text, user_message=True, level="error")
                 except Exception:
                     logger.exception("Failed to queue finalize error frames")
                 return False
@@ -205,10 +218,7 @@ async def finalize_confai_transcription(task: PipelineTask) -> bool:
         err_text = f"Error finalizing remote transcription session: {e}"
         logger.exception(err_text)
         try:
-            ui_err = OutputTransportMessageFrame(message={"text": err_text, "type": "error"})
-            await task.queue_frame(ui_err)
-            ui_user_err = UserTextFrame(text=err_text)
-            await task.queue_frame(ui_user_err)
+            await send_frontend_message(task, text=err_text, user_message=True, level="error")
         except Exception:
             logger.exception("Failed to queue finalize exception frames")
         return False
@@ -241,8 +251,7 @@ async def append_confai_transcription(task: PipelineTask, content: str) -> bool:
                 err_text = f"Failed to append to remote transcription session: HTTP {resp.status}"
                 logger.error(err_text)
                 try:
-                    ui_err = OutputTransportMessageFrame(message={"text": err_text, "type": "error"})
-                    await task.queue_frame(ui_err)
+                    await send_frontend_message(task, text=err_text, user_message=False, level="error")
                 except Exception:
                     logger.exception("Failed to queue append error frame")
                 return False
@@ -254,8 +263,7 @@ async def append_confai_transcription(task: PipelineTask, content: str) -> bool:
         err_text = f"Error appending to remote transcription session: {e}"
         logger.exception(err_text)
         try:
-            ui_err = OutputTransportMessageFrame(message={"text": err_text, "type": "error"})
-            await task.queue_frame(ui_err)
+            await send_frontend_message(task, text=err_text, user_message=False, level="error")
         except Exception:
             logger.exception("Failed to queue append exception frame")
         return False
