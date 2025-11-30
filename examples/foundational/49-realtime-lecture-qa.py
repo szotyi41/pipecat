@@ -71,14 +71,22 @@ async def start_confai_transcription(task: PipelineTask) -> str | None:
         headers = {"X-Admin-Key": confai_key}
     else:
         headers = {}
-        logger.warning("CONFAI_API_KEY not set — POSTing without X-Admin-Key header")
+        logger.error("CONFAI_API_KEY not set — POSTing without X-Admin-Key header")
 
     try:
         async with aiohttp.ClientSession() as http:
+            logger.info(f"📤 POSTing to confai transcription/start endpoint... {headers}")
             resp = await http.post(url, json=payload, headers=headers)
             if resp.status != 200:
                 err_text = f"Failed to start remote transcription session: HTTP {resp.status}"
+                # Try to read response body for more details and log it
+                try:
+                    resp_text = await resp.text()
+                except Exception:
+                    resp_text = None
                 logger.error(err_text)
+                if resp_text:
+                    logger.error(f"Response body: {resp_text}")
                 try:
                     ui_err = OutputTransportMessageFrame(message={"text": err_text, "type": "error"})
                     await task.queue_frame(ui_err)
@@ -154,12 +162,12 @@ async def finalize_confai_transcription(task: PipelineTask) -> bool:
     Returns True on success, False otherwise. Not fatal — used during disconnect.
     """
     if not hasattr(task, "_remote_transcription") or not task._remote_transcription:
-        logger.warning("No remote transcription session stored on task; nothing to finalize")
+        logger.error("No remote transcription session stored on task; nothing to finalize")
         return False
 
     session_id = task._remote_transcription.get("session_id")
     if not session_id:
-        logger.warning("Remote transcription session info missing session_id; nothing to finalize")
+        logger.error("Remote transcription session info missing session_id; nothing to finalize")
         return False
 
     url = "https://confai.telekom.hu/api/transcription/finalize"
