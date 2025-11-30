@@ -95,6 +95,18 @@ async def start_confai_transcription(task: PipelineTask) -> str | None:
             if session_id:
                 task._remote_transcription = {"session_id": session_id, "raw": body}
                 logger.info(f"Started remote transcription session: {session_id}")
+                # Send filename and source_identifier to frontend as a structured message
+                try:
+                    session_meta = OutputTransportMessageFrame(
+                        message={
+                            "filename": payload["filename"],
+                            "source_identifier": payload["source_identifier"],
+                            "type": "session_start",
+                        }
+                    )
+                    await task.queue_frame(session_meta)
+                except Exception:
+                    logger.exception("Failed to queue session metadata frame")
                 try:
                     info_text = f"Kapcsolat létrejött a https://confai.telekom.hu/ szolgáltatással. session_id: {session_id}"
                     info_msg = OutputTransportMessageFrame(message={"text": info_text, "type": "chat"})
