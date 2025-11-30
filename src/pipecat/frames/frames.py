@@ -394,6 +394,20 @@ class TTSTextFrame(AggregatedTextFrame):
 
 
 @dataclass
+class UserTextFrame(TextFrame):
+    """Text frame representing a user message to be displayed as a chat bubble.
+
+    The demo frontend renders `UserTextFrame` as a user chat bubble. We set
+    `append_to_context=False` by default so these injected UI frames don't
+    accidentally become part of the LLM context.
+    """
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.append_to_context = False
+
+
+@dataclass
 class TranscriptionFrame(TextFrame):
     """Text frame containing speech transcription data.
 
